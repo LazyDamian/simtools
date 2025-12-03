@@ -59,8 +59,10 @@ def schiffe_platzieren():
                                 break
                         if platziert:
                             break
-                    if platziert:
-                        break
+                    if not platziert:
+                        raise RuntimeError(f"Schiff kann nicht platziert werden: Länge {länge}, Schiff {i+1}")
+
+
 
     return spielfeld
 
