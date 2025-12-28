@@ -3,12 +3,13 @@ from src.game_logic_smart import run_smart_simulation
 from src.monte_carlo import run_monte_carlo_simulation
 from typing import Dict, Any
 
-N_SIMULATIONS = 10000
+# Set the total number of simulations and the master seed
+N_SIMULATIONS = 100000
 BASE_SEED = 42
 
 
 def print_comparison(random_stats: Dict[str, Any], smart_stats: Dict[str, Any]) -> None:
-    """Prints a formatted comparison table."""
+    """Prints a comparison table of the simulation results."""
     print("\n" + "=" * 60)
     print(f"{'METRIC':<20} | {'RANDOM STRATEGY':<18} | {'SMART AI':<18}")
     print("-" * 60)
@@ -29,18 +30,20 @@ def print_comparison(random_stats: Dict[str, Any], smart_stats: Dict[str, Any]) 
     print("=" * 60)
 
     improvement = random_stats['avg'] - smart_stats['avg']
-    print(f"Result: The AI is on average {improvement:.2f} shots more efficient.")
+    print(f"Summary: The AI is on average {improvement:.2f} shots more efficient.")
 
 
 def main():
-    print(f"--- Battleship Monte Carlo (Seed: {BASE_SEED}) ---")
+    """Main execution flow."""
+    print(f"--- Battleship Monte Carlo Analysis (Seed: {BASE_SEED}) ---")
 
-    # 1. Random Strategy
+    # Run Random Search Strategy
     random_results = run_monte_carlo_simulation(N_SIMULATIONS, run_random_simulation, BASE_SEED)
 
-    # 2. Smart AI
+    # Run Smart AI Strategy
     smart_results = run_monte_carlo_simulation(N_SIMULATIONS, run_smart_simulation, BASE_SEED)
 
+    # Output the comparison
     print_comparison(random_results, smart_results)
 
 

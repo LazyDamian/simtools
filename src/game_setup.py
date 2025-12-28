@@ -20,17 +20,7 @@ def is_space_free(
         horizontal: bool
 ) -> bool:
     """
-    Checks if a ship can be placed at the given position with a 1-cell buffer.
-
-    Args:
-        board: The current game board array.
-        row: Starting row index.
-        col: Starting column index.
-        length: Length of the ship.
-        horizontal: Orientation of the ship.
-
-    Returns:
-        True if the space is valid and clear of other ships/buffers.
+    Checks if a ship can be placed at the given position with a 1-cell safety buffer.
     """
     rows, cols = BOARD_SIZE
 
@@ -57,47 +47,49 @@ def is_space_free(
 
 def create_new_board(rng: Generator) -> np.ndarray:
     """
-    Initializes a board and places ships randomly using the provided generator.
-
-    Args:
-        rng: Local NumPy Generator for reproducible randomness.
-
-    Returns:
-        A 10x10 array with ship lengths marking ship positions.
+    Initializes a board and places ships.
+    If placement fails due to a 'tight' random configuration,
+    it restarts the entire board creation to ensure robustness.
     """
-    board: np.ndarray = np.zeros(BOARD_SIZE, dtype=int)
-    rows, cols = BOARD_SIZE
+    while True:
+        board: np.ndarray = np.zeros(BOARD_SIZE, dtype=int)
+        rows, cols = BOARD_SIZE
 
-    ship_lengths: List[int] = []
-    for length, count in SHIP_CONFIG.items():
-        ship_lengths.extend([length] * count)
+        ship_lengths: List[int] = []
+        for length, count in SHIP_CONFIG.items():
+            ship_lengths.extend([length] * count)
 
-    # Randomize placement order
-    ship_lengths = rng.permutation(ship_lengths)
+        # Randomize the order in which ships are placed
+        ship_lengths = rng.permutation(ship_lengths)
+        all_placed_successfully = True
 
-    for length in ship_lengths:
-        placed = False
-        attempts = 0
-        while not placed and attempts < 1000:
-            attempts += 1
-            is_horizontal = rng.choice([True, False])
+        for length in ship_lengths:
+            placed = False
+            attempts = 0
+            # Try placing the specific ship up to 500 times
+            while not placed and attempts < 500:
+                attempts += 1
+                is_horizontal = rng.choice([True, False])
 
-            if is_horizontal:
-                max_r, max_c = rows - 1, cols - length
-            else:
-                max_r, max_c = rows - length, cols - 1
-
-            r_start = rng.integers(0, max_r + 1)
-            c_start = rng.integers(0, max_c + 1)
-
-            if is_space_free(board, r_start, c_start, length, is_horizontal):
                 if is_horizontal:
-                    board[r_start, c_start: c_start + length] = length
+                    max_r, max_c = rows - 1, cols - length
                 else:
-                    board[r_start: r_start + length, c_start] = length
-                placed = True
+                    max_r, max_c = rows - length, cols - 1
 
-        if not placed:
-            raise RuntimeError("Could not place ships. Check board constraints.")
+                r_start = rng.integers(0, max_r + 1)
+                c_start = rng.integers(0, max_c + 1)
 
-    return board
+                if is_space_free(board, r_start, c_start, length, is_horizontal):
+                    if is_horizontal:
+                        board[r_start, c_start: c_start + length] = length
+                    else:
+                        board[r_start: r_start + length, c_start] = length
+                    placed = True
+
+            if not placed:
+                # If a ship couldn't be placed, break and restart the whole board
+                all_placed_successfully = False
+                break
+
+        if all_placed_successfully:
+            return board
