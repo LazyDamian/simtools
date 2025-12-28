@@ -8,7 +8,7 @@ N_SIMULATIONS = 100000
 BASE_SEED = 42
 
 
-def print_comparison(random_stats: Dict[str, Any], smart_stats: Dict[str, Any]) -> None:
+def print_comparison(random_stats: Dict[str, Any], smart_stats: Dict[str, Any]):
     """Prints a comparison table of the simulation results."""
     print("\n" + "=" * 60)
     print(f"{'METRIC':<20} | {'RANDOM STRATEGY':<18} | {'SMART AI':<18}")
