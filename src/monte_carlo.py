@@ -48,7 +48,6 @@ def run_monte_carlo_simulation(
     return {
         'raw_data': results,
         'avg': np.mean(results),
-        'median': np.median(results),
         'variance': np.var(results),
         'std_dev': np.std(results),
         'min': np.min(results),
